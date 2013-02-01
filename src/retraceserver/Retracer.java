@@ -18,7 +18,6 @@
 
 package retraceserver;
 
-import com.sun.istack.internal.Nullable;
 import proguard.obfuscate.MappingProcessor;
 import proguard.obfuscate.MappingReader;
 
@@ -52,8 +51,9 @@ public class Retracer implements MappingProcessor
     /**
      * This method is thread-safe
      * If the className or the methodName can't be unobfuscated, the obfuscated versions will be returned
+     * @param methodName: method name to unobfuscate, or null to unobfuscate only the class name
      */
-    public Result retrace(String className, @Nullable String methodName, int lineNumber)
+    public Result retrace(String className, String methodName, int lineNumber)
     {
         Result result = new Result();
         result.className = originalClassName(className);
