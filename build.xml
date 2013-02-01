@@ -1,179 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="retraceserver" default="all">
 
-  <!-- Uncomment the following property if no tests compilation is needed -->
-  <property name="skip.tests" value="true"/>
+    <dirname property="basedir" file="${ant.file}"/>
+    <property name="output.dir" value="${basedir}/out"/>
 
-  <!-- Compiler options -->
+    <path id="classpath">
+        <pathelement location="${basedir}/lib/proguard.jar"/>
+        <pathelement location="${basedir}/lib/netty-3.5.8.jar"/>
+    </path>
 
-  <property name="compiler.debug" value="on"/>
-  <property name="compiler.generate.no.warnings" value="off"/>
-  <property name="compiler.args" value=""/>
-  <property name="compiler.max.memory" value="128m"/>
-  <patternset id="ignored.files">
-    <exclude name="**/CVS/**"/>
-    <exclude name="**/SCCS/**"/>
-    <exclude name="**/RCS/**"/>
-    <exclude name="**/rcs/**"/>
-    <exclude name="**/.DS_Store/**"/>
-    <exclude name="**/.svn/**"/>
-    <exclude name="**/.pyc/**"/>
-    <exclude name="**/.pyo/**"/>
-    <exclude name="**/*.pyc/**"/>
-    <exclude name="**/*.pyo/**"/>
-    <exclude name="**/.git/**"/>
-    <exclude name="**/*.hprof/**"/>
-    <exclude name="**/_svn/**"/>
-    <exclude name="**/.hg/**"/>
-    <exclude name="**/*~/**"/>
-    <exclude name="**/__pycache__/**"/>
-    <exclude name="**/.bundle/**"/>
-    <exclude name="**/*.rbc/**"/>
-  </patternset>
-  <patternset id="library.patterns">
-    <include name="*.zip"/>
-    <include name="*.apk"/>
-    <include name="*.war"/>
-    <include name="*.egg"/>
-    <include name="*.ear"/>
-    <include name="*.ane"/>
-    <include name="*.swc"/>
-    <include name="*.jar"/>
-  </patternset>
-  <patternset id="compiler.resources">
-    <include name="**/?*.properties"/>
-    <include name="**/?*.xml"/>
-    <include name="**/?*.gif"/>
-    <include name="**/?*.png"/>
-    <include name="**/?*.jpeg"/>
-    <include name="**/?*.jpg"/>
-    <include name="**/?*.html"/>
-    <include name="**/?*.dtd"/>
-    <include name="**/?*.tld"/>
-    <include name="**/?*.ftl"/>
-  </patternset>
+    <path id="sourcepath">
+        <dirset dir="${basedir}">
+            <include name="src"/>
+        </dirset>
+    </path>
 
-  <!-- Modules -->
+    <target name="build" description="Build RetraceServer jar">
+        <mkdir dir="${output.dir}/classes"/>
+        <javac destdir="${output.dir}/classes" fork="true">
+            <classpath refid="classpath"/>
+            <src refid="sourcepath"/>
+        </javac>
 
+        <mkdir dir="${output.dir}/jar"/>
+        <jar destfile="${output.dir}/jar/RetraceServer.jar" manifest="${basedir}/src/META-INF/MANIFEST.MF">
+            <zipfileset dir="${output.dir}/classes"/>
+            <zipfileset src="${basedir}/lib/netty-3.5.8.jar"/>
+            <zipfileset src="${basedir}/lib/proguard.jar"/>
+        </jar>
+    </target>
 
-  <!-- Module RetraceServer -->
+    <target name="clean">
+        <delete dir="${output.dir}"/>
+    </target>
 
-  <dirname property="module.retraceserver.basedir" file="${ant.file}"/>
-
-
-
-  <property name="compiler.args.retraceserver" value="${compiler.args}"/>
-
-  <property name="retraceserver.output.dir" value="${module.retraceserver.basedir}/out/production/RetraceServer"/>
-  <property name="retraceserver.testoutput.dir" value="${module.retraceserver.basedir}/out/test/RetraceServer"/>
-
-  <path id="retraceserver.module.bootclasspath">
-    <!-- Paths to be included in compilation bootclasspath -->
-  </path>
-
-  <path id="retraceserver.module.production.classpath">
-    <pathelement location="${basedir}/lib/proguard.jar"/>
-    <pathelement location="${basedir}/lib/netty-3.5.8.jar"/>
-  </path>
-
-  <path id="retraceserver.runtime.production.module.classpath">
-    <pathelement location="${retraceserver.output.dir}"/>
-    <pathelement location="${basedir}/lib/proguard.jar"/>
-    <pathelement location="${basedir}/lib/netty-3.5.8.jar"/>
-  </path>
-
-  <path id="retraceserver.module.classpath">
-    <pathelement location="${retraceserver.output.dir}"/>
-    <pathelement location="${basedir}/lib/proguard.jar"/>
-    <pathelement location="${basedir}/lib/netty-3.5.8.jar"/>
-  </path>
-
-  <path id="retraceserver.runtime.module.classpath">
-    <pathelement location="${retraceserver.testoutput.dir}"/>
-    <pathelement location="${retraceserver.output.dir}"/>
-    <pathelement location="${basedir}/lib/proguard.jar"/>
-    <pathelement location="${basedir}/lib/netty-3.5.8.jar"/>
-  </path>
-
-
-  <patternset id="excluded.from.module.retraceserver">
-    <patternset refid="ignored.files"/>
-  </patternset>
-
-  <patternset id="excluded.from.compilation.retraceserver">
-    <patternset refid="excluded.from.module.retraceserver"/>
-  </patternset>
-
-  <path id="retraceserver.module.sourcepath">
-    <dirset dir="${module.retraceserver.basedir}">
-      <include name="src"/>
-    </dirset>
-  </path>
-
-
-  <target name="compile.module.retraceserver" depends="compile.module.retraceserver.production,compile.module.retraceserver.tests" description="Compile module RetraceServer"/>
-
-  <target name="compile.module.retraceserver.production" description="Compile module RetraceServer; production classes">
-    <mkdir dir="${retraceserver.output.dir}"/>
-    <javac destdir="${retraceserver.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true">
-      <compilerarg line="${compiler.args.retraceserver}"/>
-      <bootclasspath refid="retraceserver.module.bootclasspath"/>
-      <classpath refid="retraceserver.module.production.classpath"/>
-      <src refid="retraceserver.module.sourcepath"/>
-      <patternset refid="excluded.from.compilation.retraceserver"/>
-    </javac>
-
-    <copy todir="${retraceserver.output.dir}">
-      <fileset dir="${module.retraceserver.basedir}/src">
-        <patternset refid="compiler.resources"/>
-        <type type="file"/>
-      </fileset>
-    </copy>
-  </target>
-
-  <target name="compile.module.retraceserver.tests" depends="compile.module.retraceserver.production" description="compile module RetraceServer; test classes" unless="skip.tests"/>
-
-  <target name="clean.module.retraceserver" description="cleanup module">
-    <delete dir="${retraceserver.output.dir}"/>
-    <delete dir="${retraceserver.testoutput.dir}"/>
-  </target>
-
-  <target name="init" description="Build initialization">
-    <!-- Perform any build initialization in this target -->
-  </target>
-
-  <target name="clean" depends="clean.module.retraceserver" description="cleanup all"/>
-
-  <target name="build.modules" depends="init, clean, compile.module.retraceserver" description="build all modules"/>
-
-  <target name="init.artifacts">
-    <property name="artifacts.temp.dir" value="${basedir}/__artifacts_temp"/>
-    <property name="artifact.output.retraceserver:jar" value="${basedir}/out/artifacts/RetraceServer_jar"/>
-    <mkdir dir="${artifacts.temp.dir}"/>
-    <property name="temp.jar.path.RetraceServer.jar" value="${artifacts.temp.dir}/RetraceServer.jar"/>
-  </target>
-
-  <target name="artifact.retraceserver:jar" depends="init.artifacts, compile.module.retraceserver" description="Build &#39;RetraceServer:jar&#39; artifact">
-    <property name="artifact.temp.output.retraceserver:jar" value="${artifacts.temp.dir}/RetraceServer_jar"/>
-    <mkdir dir="${artifact.temp.output.retraceserver:jar}"/>
-    <jar destfile="${temp.jar.path.RetraceServer.jar}" duplicate="preserve" filesetmanifest="mergewithoutmain">
-      <zipfileset file="${basedir}/src/META-INF/MANIFEST.MF" prefix="META-INF"/>
-      <zipfileset dir="${retraceserver.output.dir}"/>
-      <zipfileset src="${basedir}/lib/netty-3.5.8.jar"/>
-      <zipfileset src="${basedir}/lib/proguard.jar"/>
-    </jar>
-    <copy file="${temp.jar.path.RetraceServer.jar}" tofile="${artifact.temp.output.retraceserver:jar}/RetraceServer.jar"/>
-  </target>
-
-  <target name="build.all.artifacts" depends="artifact.retraceserver:jar" description="Build all artifacts">
-    <mkdir dir="${artifact.output.retraceserver:jar}"/>
-    <copy todir="${artifact.output.retraceserver:jar}">
-      <fileset dir="${artifact.temp.output.retraceserver:jar}"/>
-    </copy>
-
-    <!-- Delete temporary files -->
-    <delete dir="${artifacts.temp.dir}"/>
-  </target>
-
-  <target name="all" depends="build.modules, build.all.artifacts" description="build all"/>
+    <target name="all" depends="clean, build" description="build all"/>
 </project>
