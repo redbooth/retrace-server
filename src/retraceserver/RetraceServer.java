@@ -181,7 +181,7 @@ public class RetraceServer
 
         private File getMappingFile(String version)
         {
-            return new File("/maps/aerofs-" + version + "-prod.map");
+            return new File("/maps/aerofs-" + version + "-public.map");
         }
 
         private String join(List list, String sep)
